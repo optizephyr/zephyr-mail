@@ -1,8 +1,17 @@
 package cli
 
-// Register is a placeholder for registering subcommands.
-// This function will be used in Task 7 when implementing Cobra subcommands.
-// Currently unused to avoid dead code until subcommands are added.
-func Register() {
-	// No commands to register yet
+import "github.com/spf13/cobra"
+
+func Register(root *cobra.Command) {
+	root.AddCommand(
+		newCheckCmd(),
+		newFetchCmd(),
+		newDownloadCmd(),
+		newSearchCmd(),
+		newMarkReadCmd(),
+		newMarkUnreadCmd(),
+		newListMailboxesCmd(),
+		newSendCmd(),
+		newTestCmd(),
+	)
 }

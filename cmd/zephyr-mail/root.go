@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/netease/zephyr-mail/internal/cli"
 	"github.com/netease/zephyr-mail/internal/common"
 	"github.com/netease/zephyr-mail/internal/config"
 	"github.com/netease/zephyr-mail/internal/output"
@@ -34,6 +35,7 @@ func Execute() {
 		output.PrintError(err)
 		os.Exit(1)
 	}
+	cli.Register(rootCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		normalized := common.NormalizeCLIError(err)
