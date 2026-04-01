@@ -5,8 +5,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/netease/zephyr-mail/internal/config"
 	"github.com/spf13/cobra"
 )
+
+var appConfig config.Config
 
 var rootCmd = &cobra.Command{
 	Use:   "zephyr-mail",
@@ -24,6 +27,13 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
+	var err error
+	appConfig, err = config.LoadFromEnv()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+
 	if err := rootCmd.Execute(); err != nil {
 		// Normalize error output to show "Unknown command" for unknown subcommands
 		// Cobra's default behavior varies, so we ensure consistent output
