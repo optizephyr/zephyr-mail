@@ -1,16 +1,23 @@
 package imap
 
+import "time"
+
 func BuildSearchCriteria(options SearchOptions) (SearchCriteria, error) {
 	criteria := SearchCriteria{
-		Unseen:   options.Unseen,
-		Seen:     options.Seen,
 		Flagged:  options.Flagged,
 		Answered: options.Answered,
 		From:     options.From,
 		To:       options.To,
 		Subject:  options.Subject,
-		Before:   options.Before,
 		UID:      options.UID,
+	}
+
+	if options.Unseen {
+		criteria.Unseen = true
+	}
+	if options.Seen {
+		criteria.Seen = true
+		criteria.Unseen = false
 	}
 
 	if options.Recent != "" {
@@ -20,7 +27,8 @@ func BuildSearchCriteria(options SearchOptions) (SearchCriteria, error) {
 		}
 		criteria.Since = since
 	} else {
-		criteria.Since = options.Since
+		criteria.Since = normalizeIMAPDate(options.Since)
+		criteria.Before = normalizeIMAPDate(options.Before)
 	}
 
 	if !hasSearchFilters(criteria) {
@@ -28,6 +36,28 @@ func BuildSearchCriteria(options SearchOptions) (SearchCriteria, error) {
 	}
 
 	return criteria, nil
+}
+
+func normalizeIMAPDate(value string) string {
+	if value == "" {
+		return ""
+	}
+
+	layouts := []string{
+		time.RFC3339Nano,
+		time.RFC3339,
+		"2006-01-02",
+		"2006-01-02 15:04:05",
+	}
+
+	for _, layout := range layouts {
+		parsed, err := time.Parse(layout, value)
+		if err == nil {
+			return FormatIMAPDate(parsed)
+		}
+	}
+
+	return value
 }
 
 func hasSearchFilters(c SearchCriteria) bool {

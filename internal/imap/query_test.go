@@ -45,3 +45,48 @@ func TestBuildSearchCriteriaRecentInvalidReturnsError(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+func TestBuildSearchCriteriaRecentIgnoresSinceAndBefore(t *testing.T) {
+	c, err := BuildSearchCriteria(SearchOptions{Recent: "30m", Since: "2026-01-01", Before: "2026-12-31"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if c.Since == "" {
+		t.Fatal("expected since to be set from recent")
+	}
+
+	if c.Before != "" {
+		t.Fatalf("expected before to be ignored when recent is set, got %q", c.Before)
+	}
+}
+
+func TestBuildSearchCriteriaNormalizesSinceAndBefore(t *testing.T) {
+	c, err := BuildSearchCriteria(SearchOptions{Since: "2026-04-01", Before: "2026-04-02"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if c.Since != "01-Apr-2026" {
+		t.Fatalf("expected normalized since, got %q", c.Since)
+	}
+
+	if c.Before != "02-Apr-2026" {
+		t.Fatalf("expected normalized before, got %q", c.Before)
+	}
+}
+
+func TestBuildSearchCriteriaSeenOverridesUnseen(t *testing.T) {
+	c, err := BuildSearchCriteria(SearchOptions{Unseen: true, Seen: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !c.Seen {
+		t.Fatal("expected seen=true")
+	}
+
+	if c.Unseen {
+		t.Fatal("expected unseen=false when seen=true")
+	}
+}
