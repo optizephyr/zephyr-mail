@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
+	"github.com/netease/zephyr-mail/internal/common"
 	"github.com/netease/zephyr-mail/internal/config"
+	"github.com/netease/zephyr-mail/internal/output"
 	"github.com/spf13/cobra"
 )
 
@@ -30,19 +31,13 @@ func Execute() {
 	var err error
 	appConfig, err = config.LoadFromEnv()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		output.PrintError(err)
 		os.Exit(1)
 	}
 
 	if err := rootCmd.Execute(); err != nil {
-		// Normalize error output to show "Unknown command" for unknown subcommands
-		// Cobra's default behavior varies, so we ensure consistent output
-		errMsg := err.Error()
-		if strings.Contains(errMsg, "unknown command") || strings.Contains(errMsg, "Unknown command") {
-			fmt.Fprintf(os.Stderr, "Unknown command\n")
-		} else {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		}
-		os.Exit(1)
+		normalized := common.NormalizeCLIError(err)
+		output.PrintError(normalized)
+		os.Exit(common.ExitCode(common.WrapExitCode(normalized, 1)))
 	}
 }
