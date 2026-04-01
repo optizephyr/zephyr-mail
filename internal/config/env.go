@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/joho/godotenv"
@@ -25,7 +26,9 @@ type Config struct {
 }
 
 func LoadFromEnv() (Config, error) {
-	_ = godotenv.Load(".env")
+	if err := loadDotEnvWithFallback(); err != nil {
+		return Config{}, err
+	}
 
 	cfg := Config{
 		IMAPHost:               getEnvDefault("IMAP_HOST", "127.0.0.1"),
@@ -45,6 +48,30 @@ func LoadFromEnv() (Config, error) {
 	}
 
 	return cfg, nil
+}
+
+func loadDotEnvWithFallback() error {
+	paths := []string{".env"}
+
+	if executablePath, err := os.Executable(); err == nil {
+		paths = append(paths, filepath.Join(filepath.Dir(executablePath), ".env"))
+	}
+
+	for _, envPath := range paths {
+		if _, err := os.Stat(envPath); err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			return err
+		}
+
+		if err := godotenv.Load(envPath); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	return nil
 }
 
 func getEnvDefault(key string, fallback string) string {

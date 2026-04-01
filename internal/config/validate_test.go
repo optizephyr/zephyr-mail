@@ -1,14 +1,14 @@
 package config
 
 import (
-	"strings"
 	"testing"
 )
 
 func TestValidateSMTPMissingHost(t *testing.T) {
 	cfg := Config{SMTPUser: "a", SMTPPass: "b"}
 	err := ValidateSMTP(cfg)
-	if err == nil || !strings.Contains(err.Error(), "Missing SMTP configuration") {
+	const want = "Missing SMTP configuration. Please set SMTP_HOST, SMTP_USER, and SMTP_PASS in .env"
+	if err == nil || err.Error() != want {
 		t.Fatalf("unexpected err: %v", err)
 	}
 }
