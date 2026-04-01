@@ -22,6 +22,16 @@ go build -o zephyr-mail ./cmd/zephyr-mail
 zephyr-mail [command] [flags]
 ```
 
+## Compatibility Tests
+
+Run the Go-vs-JS parity suite with:
+
+```bash
+go test ./tests/parity -v
+```
+
+The matrix for the scripted scenarios lives in `docs/superpowers/parity/zephyr-mail-parity-matrix.md`.
+
 ## Supported Providers
 
 - Gmail

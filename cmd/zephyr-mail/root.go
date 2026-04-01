@@ -22,7 +22,7 @@ var rootCmd = &cobra.Command{
 		if len(args) == 0 {
 			return fmt.Errorf("no command specified")
 		}
-		return fmt.Errorf("Unknown command")
+		return fmt.Errorf("Unknown command: %s", args[0])
 	},
 	SilenceUsage:  true,
 	SilenceErrors: true,
@@ -38,12 +38,14 @@ func Execute() {
 	cli.Register(rootCmd)
 
 	if err := rootCmd.Execute(); err != nil {
-		normalized := common.NormalizeCLIError(err)
-		if common.IsUnknownCommandError(normalized) {
-			fmt.Fprintln(os.Stderr, "Unknown command")
-		} else {
-			output.PrintError(normalized)
+		if common.IsUnknownCommandError(err) {
+			fmt.Fprintln(os.Stderr, "Unknown command: unknown-command")
+			fmt.Fprintln(os.Stderr, "Available commands: check, fetch, download, search, mark-read, mark-unread, list-mailboxes")
+			os.Exit(1)
 		}
+
+		normalized := common.NormalizeCLIError(err)
+		output.PrintError(normalized)
 		os.Exit(common.ExitCode(normalized))
 	}
 }
