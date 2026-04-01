@@ -1,36 +1,50 @@
 # Zephyr Mail
 
-A CLI tool for sending and receiving email via IMAP and SMTP protocols.
+`zephyr-mail` is the primary CLI for IMAP and SMTP email operations.
 
-## Installation
+## Install
 
 ```bash
 go install github.com/netease/zephyr-mail/cmd/zephyr-mail@latest
 ```
 
-Or build from source:
+Or build locally:
 
 ```bash
-git clone https://github.com/netease/zephyr-mail.git
-cd zephyr-mail
 go build -o zephyr-mail ./cmd/zephyr-mail
 ```
 
 ## Usage
 
 ```bash
-zephyr-mail [command] [flags]
+zephyr-mail check --limit 10
+zephyr-mail fetch <uid>
+zephyr-mail download <uid> --dir .
+zephyr-mail search --unseen --recent 24h
+zephyr-mail mark-read <uid>
+zephyr-mail mark-unread <uid>
+zephyr-mail list-mailboxes
+zephyr-mail send --to recipient@example.com --subject "Hello" --body "Message body"
+zephyr-mail test
 ```
 
-## Compatibility Tests
+## Parity Gate
 
-Run the Go-vs-JS parity suite with:
+The JS entrypoints in `scripts/` are kept as compatibility baselines while parity is tracked.
+
+Run the release gate with:
 
 ```bash
-go test ./tests/parity -v
+go test ./tests/parity -run TestReleaseGateMatrixComplete -v
 ```
 
-The matrix for the scripted scenarios lives in `docs/superpowers/parity/zephyr-mail-parity-matrix.md`.
+Run the full verification suite with:
+
+```bash
+go test ./...
+```
+
+The current parity matrix lives in `docs/superpowers/parity/zephyr-mail-parity-matrix.md`.
 
 ## Supported Providers
 

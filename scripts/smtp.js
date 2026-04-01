@@ -4,6 +4,7 @@
  * SMTP Email CLI
  * Send email via SMTP protocol. Works with Gmail, Outlook, 163.com, and any standard SMTP server.
  * Supports attachments, HTML content, and multiple recipients.
+ * Compatibility baseline for parity tests until the JS entrypoint is retired.
  */
 
 const nodemailer = require('nodemailer');

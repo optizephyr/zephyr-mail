@@ -4,6 +4,7 @@
  * IMAP Email CLI - imapflow version
  * Works with any standard IMAP server (QQ, 163, Gmail, Fastmail, etc.)
  * Better UTF-8/Chinese support with imapflow
+ * Compatibility baseline for parity tests until the JS entrypoint is retired.
  */
 
 const { ImapFlow } = require('imapflow');

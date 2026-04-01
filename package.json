@@ -1,12 +1,18 @@
 {
   "name": "imap-smtp-email-skill",
   "version": "1.0.0",
-  "description": "IMAP/SMTP email tool for Claude. Works with Gmail, Outlook, 163.com, vip.163.com, 126.com, vip.126.com, 188.com, vip.188.com, and any standard IMAP/SMTP server.",
+  "description": "Zephyr Mail compatibility wrappers for IMAP/SMTP parity testing and legacy JS entrypoints.",
   "main": "scripts/imap.js",
   "scripts": {
     "check": "node scripts/imap.js check",
     "fetch": "node scripts/imap.js fetch",
-    "search": "node scripts/imap.js search"
+    "download": "node scripts/imap.js download",
+    "search": "node scripts/imap.js search",
+    "mark-read": "node scripts/imap.js mark-read",
+    "mark-unread": "node scripts/imap.js mark-unread",
+    "list-mailboxes": "node scripts/imap.js list-mailboxes",
+    "send": "node scripts/smtp.js send",
+    "test": "node scripts/smtp.js test"
   },
   "dependencies": {
     "dotenv": "^16.6.1",

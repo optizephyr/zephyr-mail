@@ -51,6 +51,12 @@ var (
 	goBinaryErr  error
 )
 
+func TestReleaseGateMatrixComplete(t *testing.T) {
+	if !ParityMatrixComplete("docs/superpowers/parity/zephyr-mail-parity-matrix.md") {
+		t.Fatal("parity matrix incomplete")
+	}
+}
+
 func TestParityUnknownCommand(t *testing.T) {
 	env := map[string]string{
 		"IMAP_HOST":    "127.0.0.1",
@@ -481,6 +487,49 @@ func buildGoBinary(t *testing.T) string {
 		t.Fatal(goBinaryErr)
 	}
 	return goBinaryPath
+}
+
+func ParityMatrixComplete(matrixPath string) bool {
+	_, file, _, ok := runtime.Caller(0)
+	if !ok {
+		return false
+	}
+	root := filepath.Clean(filepath.Join(filepath.Dir(file), "..", ".."))
+	content, err := os.ReadFile(filepath.Join(root, filepath.Clean(matrixPath)))
+	if err != nil {
+		return false
+	}
+
+	requiredScenarios := []string{
+		"unknown-command",
+		"check success",
+		"fetch missing UID",
+		"fetch success",
+		"download success",
+		"search unseen recent",
+		"mark-read success",
+		"mark-unread success",
+		"list-mailboxes success",
+		"send missing `--to`",
+		"send success",
+		"test success",
+	}
+
+	text := string(content)
+	for _, scenario := range requiredScenarios {
+		found := false
+		for _, line := range strings.Split(text, "\n") {
+			if strings.Contains(line, "| "+scenario+" |") && strings.Contains(line, "| PASS |") {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+
+	return true
 }
 
 type imapParityServer struct {
