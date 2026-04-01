@@ -7,16 +7,18 @@ import (
 	"testing"
 )
 
-func runCLI(args ...string) (int, string, string) {
-	// Build the binary first
-	buildCmd := exec.Command("go", "build", "-o", "/tmp/zephyr-mail-test", "./cmd/zephyr-mail")
-	buildCmd.Dir = "../.."
+func runCLI(t *testing.T, args ...string) (int, string, string) {
+	// Build the binary to a temp location
+	binaryPath := "/tmp/zephyr-mail-test"
+	buildCmd := exec.Command("go", "build", "-o", binaryPath, "./cmd/zephyr-mail")
+	// Force working directory to repo root
+	buildCmd.Dir = "/Users/optizephyr/Codes/zephyr-mail"
 	if output, err := buildCmd.CombinedOutput(); err != nil {
 		panic(string(output))
 	}
 
 	// Run the binary
-	cmd := exec.Command("/tmp/zephyr-mail-test", args...)
+	cmd := exec.Command(binaryPath, args...)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -37,7 +39,7 @@ func runCLI(args ...string) (int, string, string) {
 }
 
 func TestRootUnknownCommandExitCode(t *testing.T) {
-	code, stdout, stderr := runCLI("unknown-command")
+	code, stdout, stderr := runCLI(t, "unknown-command")
 	if code != 1 {
 		t.Fatalf("want exit 1, got %d", code)
 	}
