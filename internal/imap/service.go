@@ -2,10 +2,13 @@ package imap
 
 import (
 	"fmt"
+	"io"
+	"strings"
 	"time"
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
+	"github.com/emersion/go-message/mail"
 )
 
 const (
@@ -152,7 +155,7 @@ func fetchMessages(cl *client.Client, uids []uint32, limit int) ([]Message, erro
 	done := make(chan error, 1)
 
 	go func() {
-		done <- cl.UidFetch(seqSet, []imap.FetchItem{imap.FetchEnvelope}, messages)
+		done <- cl.UidFetch(seqSet, fetchItemsForMessage(), messages)
 	}()
 
 	var results []Message
@@ -190,6 +193,35 @@ func parseMessage(msg *imap.Message) Message {
 		}
 		if !msg.Envelope.Date.IsZero() {
 			m.Date = msg.Envelope.Date.Format(time.RFC3339)
+		}
+	}
+
+	section := &imap.BodySectionName{}
+	if r := msg.GetBody(section); r != nil {
+		mr, err := mail.CreateReader(r)
+		if err == nil {
+			for {
+				part, err := mr.NextPart()
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					break
+				}
+
+				switch header := part.Header.(type) {
+				case *mail.InlineHeader:
+					contentType, _, _ := header.ContentType()
+					if strings.HasPrefix(contentType, "text/plain") {
+						b, _ := io.ReadAll(part.Body)
+						m.Text = string(b)
+					} else if strings.HasPrefix(contentType, "text/html") {
+						b, _ := io.ReadAll(part.Body)
+						m.HTML = string(b)
+					}
+				}
+			}
+			mr.Close()
 		}
 	}
 
@@ -231,7 +263,7 @@ func Fetch(cl *client.Client, uid string, mailbox string) ([]Message, error) {
 	done := make(chan error, 1)
 
 	go func() {
-		done <- cl.UidFetch(seqSet, []imap.FetchItem{imap.FetchEnvelope}, messages)
+		done <- cl.UidFetch(seqSet, fetchItemsForMessage(), messages)
 	}()
 
 	var results []Message
@@ -246,6 +278,11 @@ func Fetch(cl *client.Client, uid string, mailbox string) ([]Message, error) {
 	}
 
 	return results, nil
+}
+
+func fetchItemsForMessage() []imap.FetchItem {
+	section := imap.BodySectionName{}
+	return []imap.FetchItem{imap.FetchEnvelope, section.FetchItem()}
 }
 
 func Download(cl *client.Client, uid string, mailbox string, outputDir string, filename string) (DownloadResult, error) {

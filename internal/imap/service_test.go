@@ -3,6 +3,8 @@ package imap
 import (
 	"strings"
 	"testing"
+
+	"github.com/emersion/go-imap"
 )
 
 func TestCheckUnseenLiteralTrueOnly(t *testing.T) {
@@ -63,5 +65,21 @@ func TestDownloadResultMessage(t *testing.T) {
 	}
 	if result.Downloaded[0].Filename != "test.txt" {
 		t.Fatal("expected filename")
+	}
+}
+
+func TestFetchItemsIncludeBodySection(t *testing.T) {
+	items := fetchItemsForMessage()
+	if len(items) != 2 {
+		t.Fatalf("expected 2 fetch items, got %d", len(items))
+	}
+
+	if items[0] != imap.FetchEnvelope {
+		t.Fatalf("expected first fetch item to be envelope, got %v", items[0])
+	}
+
+	bodySection := imap.BodySectionName{}
+	if items[1] != bodySection.FetchItem() {
+		t.Fatalf("expected second fetch item to be body section, got %v", items[1])
 	}
 }
