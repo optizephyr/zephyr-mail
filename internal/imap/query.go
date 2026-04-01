@@ -1,6 +1,6 @@
 package imap
 
-func BuildSearchCriteria(options SearchOptions) SearchCriteria {
+func BuildSearchCriteria(options SearchOptions) (SearchCriteria, error) {
 	criteria := SearchCriteria{
 		Unseen:   options.Unseen,
 		Seen:     options.Seen,
@@ -15,9 +15,10 @@ func BuildSearchCriteria(options SearchOptions) SearchCriteria {
 
 	if options.Recent != "" {
 		since, err := ParseRelativeTime(options.Recent)
-		if err == nil {
-			criteria.Since = since
+		if err != nil {
+			return SearchCriteria{}, err
 		}
+		criteria.Since = since
 	} else {
 		criteria.Since = options.Since
 	}
@@ -26,7 +27,7 @@ func BuildSearchCriteria(options SearchOptions) SearchCriteria {
 		criteria.All = true
 	}
 
-	return criteria
+	return criteria, nil
 }
 
 func hasSearchFilters(c SearchCriteria) bool {
