@@ -7,12 +7,12 @@ import (
 )
 
 func PrintJSON(v any) {
-	data, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
+	encoder := json.NewEncoder(os.Stdout)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", "  ")
+	if err := encoder.Encode(v); err != nil {
 		PrintError(err)
-		return
 	}
-	fmt.Fprintln(os.Stdout, string(data))
 }
 
 func PrintError(err error) {

@@ -53,3 +53,13 @@ func TestPrintJSONPretty(t *testing.T) {
 		t.Fatal("expected pretty json")
 	}
 }
+
+func TestPrintJSONDoesNotHTMLEscape(t *testing.T) {
+	out := captureStdout(func() { PrintJSON(map[string]any{"text": "a<b>&c"}) })
+	if strings.Contains(out, "\\u003c") || strings.Contains(out, "\\u003e") || strings.Contains(out, "\\u0026") {
+		t.Fatalf("expected unescaped html chars, got: %s", out)
+	}
+	if !strings.Contains(out, "a<b>&c") {
+		t.Fatalf("expected raw html chars, got: %s", out)
+	}
+}

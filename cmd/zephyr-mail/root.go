@@ -37,7 +37,11 @@ func Execute() {
 
 	if err := rootCmd.Execute(); err != nil {
 		normalized := common.NormalizeCLIError(err)
-		output.PrintError(normalized)
-		os.Exit(common.ExitCode(common.WrapExitCode(normalized, 1)))
+		if common.IsUnknownCommandError(normalized) {
+			fmt.Fprintln(os.Stderr, "Unknown command")
+		} else {
+			output.PrintError(normalized)
+		}
+		os.Exit(common.ExitCode(normalized))
 	}
 }

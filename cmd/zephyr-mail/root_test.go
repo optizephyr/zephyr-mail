@@ -49,4 +49,7 @@ func TestRootUnknownCommandExitCode(t *testing.T) {
 	if !strings.Contains(stderr, "Unknown command") {
 		t.Fatalf("unexpected stderr: %s", stderr)
 	}
+	if strings.Contains(stderr, "Error:") {
+		t.Fatalf("unexpected error prefix for unknown command: %s", stderr)
+	}
 }

@@ -48,9 +48,21 @@ func NormalizeCLIError(err error) error {
 	if err == nil {
 		return nil
 	}
-	errMsg := err.Error()
-	if strings.Contains(errMsg, "unknown command") || strings.Contains(errMsg, "Unknown command") {
-		return errors.New("Unknown command")
+	if IsUnknownCommandError(err) {
+		normalized := errors.New("Unknown command")
+		var exitErr *ExitError
+		if errors.As(err, &exitErr) && exitErr.Code > 0 {
+			return &ExitError{Code: exitErr.Code, Err: normalized}
+		}
+		return normalized
 	}
 	return err
+}
+
+func IsUnknownCommandError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errMsg := err.Error()
+	return strings.Contains(errMsg, "unknown command") || strings.Contains(errMsg, "Unknown command")
 }
