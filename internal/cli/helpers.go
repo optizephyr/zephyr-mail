@@ -6,9 +6,9 @@ import (
 	"strconv"
 
 	imapclient "github.com/emersion/go-imap/client"
-	"github.com/netease/zephyr-mail/internal/config"
-	imapsvc "github.com/netease/zephyr-mail/internal/imap"
-	smtpsvc "github.com/netease/zephyr-mail/internal/smtp"
+	"github.com/optizephyr/zephyr-mail/internal/config"
+	imapsvc "github.com/optizephyr/zephyr-mail/internal/imap"
+	smtpsvc "github.com/optizephyr/zephyr-mail/internal/smtp"
 )
 
 func loadIMAPConfig() (imapsvc.ClientConfig, error) {

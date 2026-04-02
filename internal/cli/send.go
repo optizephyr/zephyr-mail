@@ -3,8 +3,8 @@ package cli
 import (
 	"fmt"
 
-	"github.com/netease/zephyr-mail/internal/output"
-	smtpsvc "github.com/netease/zephyr-mail/internal/smtp"
+	"github.com/optizephyr/zephyr-mail/internal/output"
+	smtpsvc "github.com/optizephyr/zephyr-mail/internal/smtp"
 	"github.com/spf13/cobra"
 )
 

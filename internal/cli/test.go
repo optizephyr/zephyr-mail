@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/netease/zephyr-mail/internal/output"
+	"github.com/optizephyr/zephyr-mail/internal/output"
 	"github.com/spf13/cobra"
 )
 

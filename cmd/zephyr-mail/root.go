@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/netease/zephyr-mail/internal/cli"
-	"github.com/netease/zephyr-mail/internal/common"
-	"github.com/netease/zephyr-mail/internal/config"
-	"github.com/netease/zephyr-mail/internal/output"
+	"github.com/optizephyr/zephyr-mail/internal/cli"
+	"github.com/optizephyr/zephyr-mail/internal/common"
+	"github.com/optizephyr/zephyr-mail/internal/config"
+	"github.com/optizephyr/zephyr-mail/internal/output"
 	"github.com/spf13/cobra"
 )
 

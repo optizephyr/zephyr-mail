@@ -1,4 +1,4 @@
-module github.com/netease/zephyr-mail
+module github.com/optizephyr/zephyr-mail
 
 go 1.22
 
