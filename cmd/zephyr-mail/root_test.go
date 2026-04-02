@@ -9,12 +9,10 @@ import (
 
 func runCLI(t *testing.T, args ...string) (int, string, string) {
 	// Build the binary to a temp location
-	binaryPath := "/tmp/zephyr-mail-test"
-	buildCmd := exec.Command("go", "build", "-o", binaryPath, "./cmd/zephyr-mail")
-	// Force working directory to repo root
-	buildCmd.Dir = "/Users/optizephyr/Codes/zephyr-mail"
+	binaryPath := t.TempDir() + "/zephyr-mail-test"
+	buildCmd := exec.Command("go", "build", "-o", binaryPath, "github.com/netease/zephyr-mail/cmd/zephyr-mail")
 	if output, err := buildCmd.CombinedOutput(); err != nil {
-		panic(string(output))
+		t.Fatalf("failed to build binary: %s", string(output))
 	}
 
 	// Run the binary
