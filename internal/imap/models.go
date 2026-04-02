@@ -78,7 +78,6 @@ type Message struct {
 	Date        string
 	Text        string
 	HTML        string
-	Snippet     string
 	Attachments []Attachment
 }
 

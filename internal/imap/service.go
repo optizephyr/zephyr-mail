@@ -3,6 +3,7 @@ package imap
 import (
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 	"time"
 
@@ -225,12 +226,59 @@ func parseMessage(msg *imap.Message) Message {
 		}
 	}
 
-	m.Snippet = m.Text
-	if len(m.Snippet) > 200 {
-		m.Snippet = m.Snippet[:200]
+	if m.Text == "" && m.HTML != "" {
+		m.Text = stripHTML(m.HTML)
 	}
 
+	normalizeText(&m)
+
 	return m
+}
+
+func normalizeText(m *Message) {
+	if m.Text == "" {
+		return
+	}
+	m.Text = strings.ReplaceAll(m.Text, "\r\n", "\n")
+	m.Text = strings.ReplaceAll(m.Text, "\r", "\n")
+	m.Text = strings.TrimSpace(m.Text)
+	m.Text = regexp.MustCompile(`(?m)^> ?`).ReplaceAllString(m.Text, "")
+	m.Text = regexp.MustCompile(`[ \t]+`).ReplaceAllString(m.Text, " ")
+	m.Text = regexp.MustCompile(`[ \t]*\n[ \t]*`).ReplaceAllString(m.Text, "\n")
+	m.Text = regexp.MustCompile(`(?:\r?\n){2,}`).ReplaceAllString(m.Text, "\n")
+}
+
+func stripHTML(input string) string {
+	if input == "" {
+		return ""
+	}
+
+	re := regexp.MustCompile(`(?is)<script[^>]*>.*?</script>`)
+	cleaned := re.ReplaceAllString(input, "")
+
+	re = regexp.MustCompile(`(?is)<style[^>]*>.*?</style>`)
+	cleaned = re.ReplaceAllString(cleaned, "")
+
+	re = regexp.MustCompile(`(?is)<!--.*?-->`)
+	cleaned = re.ReplaceAllString(cleaned, "")
+
+	replacements := []string{
+		`(?:<br\s*/?>|<br>)`, "\n",
+		`(?:</p>|</div>|</li>|</tr>|</th>|</td>)`, "\n",
+		`(?:<p[^>]*>|<div[^>]*>|<li[^>]*>|<tr[^>]*)`, "\n",
+		`<[^>]+>`, " ",
+	}
+
+	for i := 0; i < len(replacements); i += 2 {
+		re = regexp.MustCompile(replacements[i])
+		cleaned = re.ReplaceAllString(cleaned, replacements[i+1])
+	}
+
+	cleaned = regexp.MustCompile(`[ \t]+`).ReplaceAllString(cleaned, " ")
+	cleaned = regexp.MustCompile(`\n\s*\n`).ReplaceAllString(cleaned, "\n")
+	cleaned = regexp.MustCompile(`\n+`).ReplaceAllString(cleaned, "\n")
+
+	return strings.TrimSpace(cleaned)
 }
 
 func extractAddress(addrs []*imap.Address) string {

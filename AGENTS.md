@@ -2,75 +2,53 @@
 
 ## Project Overview
 
-This is a Node.js CLI tool for sending/receiving email via IMAP and SMTP protocols. It supports Gmail, Outlook, 163.com, and other standard IMAP/SMTP servers.
+This is a Go CLI tool for sending/receiving email via IMAP and SMTP protocols. It supports Gmail, Outlook, 163.com, and other standard IMAP/SMTP servers.
 
 ## Build & Run Commands
 
-### Install Dependencies
+### Build
 ```bash
-npm install
+go build -o zephyr-mail ./cmd/zephyr-mail
 ```
 
 ### Run IMAP Commands
 ```bash
-node scripts/imap.js check [--limit N] [--recent Nh|Nm] [--unseen]
-node scripts/imap.js fetch <uid>
-node scripts/imap.js search [--from X] [--subject X] [--unseen] [--recent Nh]
-node scripts/imap.js mark-read <uid> [uid2...]
-node scripts/imap.js mark-unread <uid> [uid2...]
-node scripts/imap.js list-mailboxes
+zephyr-mail check [--limit N] [--recent Nh|Nm] [--unseen]
+zephyr-mail fetch <uid>
+zephyr-mail search [--from X] [--subject X] [--unseen] [--recent Nh]
+zephyr-mail download <uid> [--dir <path>] [--file <filename>]
+zephyr-mail mark-read <uid> [uid2...]
+zephyr-mail mark-unread <uid> [uid2...]
+zephyr-mail list-mailboxes
 ```
 
 ### Run SMTP Commands
 ```bash
-node scripts/smtp.js send --to <email> --subject <text> [--body <text>] [--html] [--cc <email>] [--attach <file>]
-node scripts/smtp.js test
-```
-
-### NPM Scripts (Aliases)
-```bash
-npm run check      # node scripts/imap.js check
-npm run fetch      # node scripts/imap.js fetch
-npm run search    # node scripts/imap.js search
+zephyr-mail send --to <email> --subject <text> [--body <text>] [--html] [--cc <email>] [--attach <file>]
+zephyr-mail test
 ```
 
 ### Test Commands
-- No project-specific tests exist
-- Run manual tests: `node scripts/imap.js check` and `node scripts/smtp.js test`
+- Run full test suite: `go test ./...`
 
 ## Code Style Guidelines
 
 ### Language
-- JavaScript (Node.js) using CommonJS
-- No TypeScript in this project
+- Go
 
 ### Imports
-- Use `require()` for dependencies
-- Load dotenv early: `require('dotenv').config({ path: path.resolve(__dirname, '../.env') })`
-- Use destructuring for modules: `const { ImapFlow } = require('imapflow');`
+- Use standard Go imports and `github.com/joho/godotenv` for `.env` loading
 
 ### Async/Await Patterns
-- Use `async/await` for all asynchronous operations
-- Always use `try/finally` to ensure connections are closed:
-  ```javascript
-  async function example() {
-    const client = await connect();
-    try {
-      // operations
-    } finally {
-      await client.logout();
-    }
-  }
-  ```
+- Use `defer` to ensure connections are closed
 
 ### Error Handling
-- Throw descriptive errors with context: `throw new Error('Missing IMAP_USER or IMAP_PASS')`
-- Use `console.error('Error:', err.message)` for errors in CLI
-- Exit with code 1 on errors: `process.exit(1)`
+- Return descriptive errors with context: `Missing IMAP_USER or IMAP_PASS`
+- Use stderr for CLI errors and exit code 1 on failure
 
 ### Output Format
-- Output JSON to stdout: `console.log(JSON.stringify(result, null, 2))`
-- Use `console.error` for status messages and errors
+- Output pretty JSON to stdout
+- Use stderr for status messages and errors
 
 ### Naming Conventions
 - **Functions**: camelCase (e.g., `createImapConfig`, `checkEmails`)
@@ -78,20 +56,18 @@ npm run search    # node scripts/imap.js search
 - **Variables**: camelCase with descriptive names
 
 ### File Structure
-- Main entry: `scripts/imap.js`, `scripts/smtp.js`
+- Main entry: `cmd/zephyr-mail`
 - Configuration via environment variables in `.env`
-- Common utility functions defined in same file
+- Common utility functions live under `internal/`
 
 ### Argument Parsing
-- Manual parsing of CLI arguments (no external library)
-- Support `--option value` format and boolean flags
-- Track positional arguments separately
+- Cobra handles command parsing and flags
 
 ### Key Libraries Used
-- `imapflow` - Modern IMAP client with UTF-8 support
-- `nodemailer` - SMTP email sending
-- `mailparser` - Email parsing
-- `dotenv` - Environment variable loading
+- `cobra` - CLI framework
+- `go-imap` - IMAP client
+- `gomail` or equivalent - SMTP email sending
+- `godotenv` - Environment variable loading
 
 ### Security
 - Never commit credentials; use `.env` file

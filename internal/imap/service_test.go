@@ -83,3 +83,21 @@ func TestFetchItemsIncludeBodySection(t *testing.T) {
 		t.Fatalf("expected second fetch item to be body section, got %v", items[1])
 	}
 }
+
+func TestStripHTMLRemovesTags(t *testing.T) {
+	got := stripHTML("<p>Hello <b>world</b></p>")
+	if got != "Hello world" {
+		t.Fatalf("expected stripped text, got %q", got)
+	}
+}
+
+func TestNormalizeTextCleansWhitespaceAndLineEndings(t *testing.T) {
+	m := Message{Text: "  Hello   world\r\n\r\nThis   is\r\na   test\n\n\nDone  "}
+
+	normalizeText(&m)
+
+	want := "Hello world\nThis is\na test\nDone"
+	if m.Text != want {
+		t.Fatalf("expected %q, got %q", want, m.Text)
+	}
+}
