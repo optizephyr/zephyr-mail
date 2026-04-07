@@ -101,3 +101,17 @@ func TestNormalizeTextCleansWhitespaceAndLineEndings(t *testing.T) {
 		t.Fatalf("expected %q, got %q", want, m.Text)
 	}
 }
+
+func TestExtractBodyTextUsesStrippedHTMLWhenTextEmpty(t *testing.T) {
+	got := extractBodyText("", "<p>Hello <b>world</b></p>")
+	if got != "Hello world" {
+		t.Fatalf("expected stripped html in text, got %q", got)
+	}
+}
+
+func TestExtractBodyTextPrefersPlainTextWhenPresent(t *testing.T) {
+	got := extractBodyText("  Plain   text\r\n\r\n", "<p>Ignored</p>")
+	if got != "Plain text" {
+		t.Fatalf("expected plain text body, got %q", got)
+	}
+}

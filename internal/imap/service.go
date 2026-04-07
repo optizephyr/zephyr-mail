@@ -184,6 +184,9 @@ func parseMessage(msg *imap.Message) Message {
 		Flags: msg.Flags,
 	}
 
+	textBody := ""
+	htmlBody := ""
+
 	if msg.Envelope != nil {
 		m.From = extractAddress(msg.Envelope.From)
 		m.To = extractAddress(msg.Envelope.To)
@@ -215,10 +218,10 @@ func parseMessage(msg *imap.Message) Message {
 					contentType, _, _ := header.ContentType()
 					if strings.HasPrefix(contentType, "text/plain") {
 						b, _ := io.ReadAll(part.Body)
-						m.Text = string(b)
+						textBody = string(b)
 					} else if strings.HasPrefix(contentType, "text/html") {
 						b, _ := io.ReadAll(part.Body)
-						m.HTML = string(b)
+						htmlBody = string(b)
 					}
 				}
 			}
@@ -226,13 +229,22 @@ func parseMessage(msg *imap.Message) Message {
 		}
 	}
 
-	if m.Text == "" && m.HTML != "" {
-		m.Text = stripHTML(m.HTML)
-	}
-
-	normalizeText(&m)
+	m.Text = extractBodyText(textBody, htmlBody)
 
 	return m
+}
+
+func extractBodyText(textBody, htmlBody string) string {
+	text := ""
+	if strings.TrimSpace(textBody) != "" {
+		text = textBody
+	} else if htmlBody != "" {
+		text = stripHTML(htmlBody)
+	}
+
+	m := Message{Text: text}
+	normalizeText(&m)
+	return m.Text
 }
 
 func normalizeText(m *Message) {
